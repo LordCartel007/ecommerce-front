@@ -7,6 +7,7 @@ import { CartContext } from "../components/CartContext";
 import axios from "axios";
 import Table from "../components/Table";
 import Input from "../components/Input";
+import { useRouter } from "next/router";
 
 const ColumnsWrapper = styled.div`
   display: grid;
@@ -44,17 +45,38 @@ const QuantityLabel = styled.span`
   padding: 0 3px;
 `;
 
+const CityHolder = styled.div`
+  display: flex;
+  gap: 5px;
+`;
+
 export default function CartPage() {
-  const { cartProducts, addProduct, removeProduct } = useContext(CartContext);
+  const { cartProducts, addProduct, removeProduct, clearCart } =
+    useContext(CartContext);
   const [products, setProducts] = useState([]);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [city, setCity] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [country, setCountry] = useState("");
+  const router = useRouter(); // Initialize Next.js router
+
   useEffect(() => {
     // sending product ids to our api
     if (cartProducts.length > 0) {
       axios.post("/api/cart", { ids: cartProducts }).then((response) => {
         setProducts(response.data);
       });
+    } else {
+      setProducts([]);
     }
   }, [cartProducts]);
+  useEffect(() => {
+    if (router.query.success) {
+      clearCart();
+    }
+  }, [router.query.success]);
 
   function moreOfThisProduct(id) {
     addProduct(id);
@@ -64,10 +86,45 @@ export default function CartPage() {
     removeProduct(id);
   }
 
+  async function goToPayment() {
+    try {
+      const response = await axios.post("/api/checkout", {
+        name,
+        email,
+        city,
+        postalCode,
+        streetAddress,
+        country,
+        cartProducts,
+      });
+      // if the data has the payment url show the page
+      if (response.data.url) {
+        router.push(response.data.url);
+      }
+    } catch (error) {
+      console.error("Checkout failed:", error);
+    }
+  }
+
   let total = 0;
   for (const productId of cartProducts) {
     const price = products.find((p) => p._id === productId)?.price || 0;
     total += price;
+  }
+  if (router.query.success) {
+    return (
+      <>
+        <Header />
+        <Center>
+          <ColumnsWrapper>
+            <Box>
+              <h1>Thanks for your order!</h1>
+              <p>We will email you when your order will be sent</p>
+            </Box>
+          </ColumnsWrapper>
+        </Center>
+      </>
+    );
   }
   return (
     <>
@@ -88,7 +145,7 @@ export default function CartPage() {
                 </thead>
                 <tbody>
                   {products.map((product) => (
-                    <tr>
+                    <tr key={product._id}>
                       <ProductInfoCell>
                         <ProductImageBox>
                           <img src={product.images[0]} alt={product.title} />
@@ -131,11 +188,57 @@ export default function CartPage() {
           {!!cartProducts?.length && (
             <Box>
               <h2>Order information</h2>
-              <Input type="text" placeholder="Address" />
-              <Input type="text" placeholder="Address 2" />
-              <Button $black $block>
-                Continue to payment
-              </Button>
+              <form>
+                <Input
+                  type="text"
+                  placeholder="Name"
+                  value={name}
+                  name="name"
+                  onChange={(ev) => setName(ev.target.value)}
+                />
+                <Input
+                  type="text"
+                  placeholder="Email"
+                  value={email}
+                  name="email"
+                  onChange={(ev) => setEmail(ev.target.value)}
+                />
+                <CityHolder>
+                  <Input
+                    type="text"
+                    placeholder="City"
+                    value={city}
+                    name="city"
+                    onChange={(ev) => setCity(ev.target.value)}
+                  />
+                  <Input
+                    type="text"
+                    placeholder="Postal Code"
+                    value={postalCode}
+                    name="postalCode"
+                    onChange={(ev) => setPostalCode(ev.target.value)}
+                  />
+                </CityHolder>
+
+                <Input
+                  type="text"
+                  placeholder="Street Address"
+                  value={streetAddress}
+                  name="streetAddress"
+                  onChange={(ev) => setStreetAddress(ev.target.value)}
+                />
+                <Input
+                  type="text"
+                  placeholder="Country"
+                  value={country}
+                  name="country"
+                  onChange={(ev) => setCountry(ev.target.value)}
+                />
+
+                <Button $black $block type="button" onClick={goToPayment}>
+                  Continue to payment
+                </Button>
+              </form>
             </Box>
           )}
         </ColumnsWrapper>
