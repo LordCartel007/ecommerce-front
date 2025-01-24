@@ -18,7 +18,9 @@ const WhiteBox = styled(Link)`
   border-radius: 10px;
   img {
     max-width: 100%;
-    max-height: 80px;
+    max-height: 130px;
+    width: auto;
+    height: auto;
   }
 `;
 
@@ -35,7 +37,8 @@ const ProductInfoBox = styled.div`
 `;
 
 const PriceRow = styled.div`
-  display: flex;
+  display: block;
+
   align-items: center;
   justify-content: space-between;
   margin-top: 2px;
@@ -45,6 +48,7 @@ const Price = styled.div`
   font-size: 1.5rem;
   font-weight: 600;
   color: #333;
+  text-align: left;
 `;
 
 export default function ProductBox({ _id, title, description, price, images }) {
@@ -61,7 +65,12 @@ export default function ProductBox({ _id, title, description, price, images }) {
         <Title href={url}>{title}</Title>
         <PriceRow>
           <Price>${price}</Price>
-          <Button onClick={() => addProduct(_id)} $primary={1} $outline={1}>
+          <Button
+            $block
+            onClick={() => addProduct(_id)}
+            $primary={1}
+            $outline={1}
+          >
             Add to cart
           </Button>
         </PriceRow>

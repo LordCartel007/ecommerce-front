@@ -85,6 +85,18 @@ export const ButtonStyle = css`
         height: 20px;
       }
     `}
+    @media screen and (max-width: 767px) {
+    font-size: 12px;
+  }
+
+  /* Medium screens (tablets) */
+  @media screen and (min-width: 768px) and (max-width: 1024px) {
+    font-size: 12px;
+  }
+
+  /* Large screens (desktops) */
+  @media screen and (min-width: 1025px) {
+  }
 `;
 
 const StyledButton = styled.button`

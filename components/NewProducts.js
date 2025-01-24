@@ -4,8 +4,12 @@ import ProductsGrid from "./ProductsGrid";
 
 const Title = styled.h2`
   font-size: 2rem;
-  margin: 30px 0 20px;
+  margin-top: 10px;
   font-weight: 500;
+
+  @media screen and (min-width: 768px) {
+    margin-top: 30px;
+  }
 `;
 
 export default function NewProducts({ products }) {
